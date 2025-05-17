@@ -1,6 +1,5 @@
 package com.example.ma_visualization_be.controller;
 
-import com.example.ma_visualization_be.dto.DetailsDataMSDTO;
 import com.example.ma_visualization_be.dto.IDetailsDataMSDTO;
 import com.example.ma_visualization_be.service.DetailsDataMSService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,8 @@ public class DetailsDataMSController {
     private DetailsDataMSService service;
 
     @GetMapping
-    public ResponseEntity<List<DetailsDataMSDTO>> getDailyDetailsMachineStopping (@RequestParam String month){
-        List<DetailsDataMSDTO> data = service.getDailyDetailsMachineStopping(month);
+    public ResponseEntity<List<IDetailsDataMSDTO>> getDailyDetailsMachineStopping (@RequestParam String month){
+        List<IDetailsDataMSDTO> data = service.getDailyDetailsMachineStopping(month);
         return  ResponseEntity.ok(data);
     }
 }
