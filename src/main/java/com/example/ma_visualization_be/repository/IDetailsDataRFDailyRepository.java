@@ -1,0 +1,44 @@
+package com.example.ma_visualization_be.repository;
+
+import com.example.ma_visualization_be.dto.IDetailsDataRFDTO;
+import com.example.ma_visualization_be.model.DummyEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import java.util.List;
+
+public interface IDetailsDataRFDailyRepository extends JpaRepository<DummyEntity, Long> {
+    @Query(value = """
+             DECLARE  @date DATE  = :month
+             DECLARE  @month VARCHAR(6)  = FORMAT(@date,'yyyyMM')
+             SELECT\s
+                CASE
+                    WHEN XBLNR2 LIKE '1566-%' THEN\s
+                        CASE
+                            WHEN LEFT(KOSTL,6) IN ('614100','614000') THEN 'PRESS'				
+                            WHEN LEFT(KOSTL,6) = '614200' THEN 'MOLD'				
+                            WHEN LEFT(KOSTL,6) IN ('614600', '614700') THEN 'GUIDE'	
+                        END
+                    ELSE 'OTHER'
+                END as Dept,
+                iss.MATNR,
+                part.MAKTX,
+                CONVERT(DATE,BLDAT,112) as UseDate,
+                KOSTL,
+                KONTO,
+                XBLNR2,
+                BKTXT,
+                ERFMG as QTY,
+                ERFME as UNIT,
+                IIF(ERFMG<0,-1,1)*AMOUNT as [ACT ($)]
+             FROM MANUFASPCPD.dbo.MANUFA_F_PD_DTM_ISSUE iss
+             INNER JOIN MANUFASPCPD.dbo.MANUFA_F_PD_GRB_PART part ON iss.MATNR = part.MATNR
+             WHERE KONTO = '570600'
+             AND LEFT(BLDAT,6) = @month
+             AND BLDAT <= @date
+             ORDER BY [ACT ($)] Desc
+            """, nativeQuery = true)
+    List<IDetailsDataRFDTO> getDailyDetailsRepairFeeDaily(@Param("month") String month, @Param("dept") String dept);
+
+}

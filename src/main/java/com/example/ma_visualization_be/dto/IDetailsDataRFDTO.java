@@ -5,8 +5,8 @@ public interface IDetailsDataRFDTO {
     String getMatnr();
     String getMaktx();
     String getUseDate();  // hoặc java.sql.Date nếu cần kiểu ngày
-    String getKostl();
-    String getKonto();
+    Double getKostl();
+    Double getKonto();
     String getXblnr2();
     String getBktxt();
     Double getQty();

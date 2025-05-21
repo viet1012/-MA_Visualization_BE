@@ -13,7 +13,7 @@ import java.util.List;
 public interface IDetailsDataMSRepository extends JpaRepository<DummyEntity, Long> {
 
     @Query(value = """
-         DECLARE @month VARCHAR(6) = REPLACE(:month, '-', '');
+        DECLARE @month VARCHAR(6) = REPLACE(:month, '-', '');
         SELECT
             GREATEST(CONVERT(DATE,dt.SENDTIME,112),CONVERT(DATE,@month + '01',112)) as SendDate,
             CASE

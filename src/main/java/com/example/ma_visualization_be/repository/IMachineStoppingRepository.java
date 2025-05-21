@@ -51,7 +51,7 @@ public interface IMachineStoppingRepository extends JpaRepository<DummyEntity, L
             		END Stop_Hour
             		FROM F2Database.dbo.f2_ma_machine_data dt
             	INNER JOIN F2Database.dbo.f2_ma_machine_master mst ON dt.machinecode = mst.code\s
-            	WHERE (SENDTIME >= CONVERT(DATE,@month + '01',112))
+            	WHERE (SENDTIME >= CONVERT(DATE,@month + '01',112) OR FINISHTIME is null)
             	AND ISSUESTATUS not in ('CANCEL')
             	) as tb
             	ON wd.[Date] = tb.SendDate AND stp.Dept = tb.DIV

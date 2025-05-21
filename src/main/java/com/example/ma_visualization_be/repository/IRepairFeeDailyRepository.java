@@ -14,62 +14,52 @@ public interface IRepairFeeDailyRepository extends JpaRepository<DummyEntity, Lo
     @Query(value = """
             DECLARE @month VARCHAR(6) = REPLACE(:month, '-', '');
             
-            SELECT\s
-                wd.[Date] AS Date,
-                stp.Dept AS Dept,
-                dc.CountDay AS CountDayAll,
-                wd.WD_Office AS WD_Office,
-                stp.FC_StopHour AS FC_USD,
-                stp.FC_StopHour * wd.WD_Office / dc.CountDay AS FC_Day,
-                SUM(Stop_Hour) AS Act
-            FROM F2Database.dbo.F2_Working_Date wd
-            INNER JOIN (
-                SELECT\s
-                    FORMAT([Date], 'yyyy-MM') AS mth,
-                    SUM(WD_Office) AS CountDay
-                FROM F2Database.dbo.F2_Working_Date
-                WHERE FORMAT([Date], 'yyyyMM') = @month
-                GROUP BY FORMAT([Date], 'yyyy-MM')
-            ) dc ON FORMAT(wd.[Date], 'yyyy-MM') = dc.mth
-            INNER JOIN F2Database.dbo.F2_MA_FC_StopHour stp\s
-                ON FORMAT(wd.[Date], 'yyyy-MM') = stp.Year_Month
-            LEFT JOIN (
-                SELECT
-                    GREATEST(CONVERT(DATE, dt.SENDTIME, 112), CONVERT(DATE, @month + '01', 112)) AS SendDate,
-                    dt.ISSUESTATUS,
-                    CASE
-                        WHEN mst.DIVISION LIKE '%GUIDE' THEN 'GUIDE'
-                        WHEN mst.DIVISION LIKE 'SUPPORT%' THEN 'PRESS'
-                        ELSE mst.DIVISION
-                    END AS DIV,
-                    GROUPNAME,
-                    MACHINECODE,
-                    MACHINE_TYPE,
-                    STATUSCODE,
-                    CONFIRM_DATE,
-                    CONVERT(VARCHAR, ISNULL(CONFIRM_DATE, SENDTIME), 120) AS SENDTIME,
-                    CONVERT(VARCHAR, STARTTIME, 120) AS STARTTIME,
-                    CONVERT(VARCHAR, ESTIME, 120) AS ESTIME,
-                    CONVERT(VARCHAR, FINISHTIME, 120) AS FINISHTIME,
-                    CASE
-                        WHEN STATUSCODE = 'ST02' THEN\s
-                            CAST(ROUND((DATEDIFF(MINUTE, GREATEST(ISNULL(CONFIRM_DATE, SENDTIME), CONVERT(DATE, @month + '01', 112)), COALESCE(FINISHTIME, GETDATE()))) / 60.0 * 20 / 24, 2) AS FLOAT)
-                        WHEN STATUSCODE = 'ST01' THEN\s
-                            CAST(ROUND((DATEDIFF(MINUTE, GREATEST(ISNULL(STARTTIME, SENDTIME), CONVERT(DATE, @month + '01', 112)), COALESCE(FINISHTIME, GETDATE()))) / 60.0 * 20 / 24, 2) AS FLOAT)
-                    END AS Stop_Hour
-                FROM F2Database.dbo.f2_ma_machine_data dt
-                INNER JOIN F2Database.dbo.f2_ma_machine_master mst\s
-                    ON dt.machinecode = mst.code
-                WHERE\s
-                    dt.SENDTIME >= CONVERT(DATE, @month + '01', 112)
-                    AND dt.ISSUESTATUS NOT IN ('CANCEL')
-            ) tb ON wd.[Date] = tb.SendDate AND stp.Dept = tb.DIV
-            
-            GROUP BY\s
-                wd.[Date], stp.Dept, stp.FC_StopHour, wd.WD_Office, dc.CountDay
-            ORDER BY\s
-                wd.[Date], stp.Dept DESC;
-            
+            SELECT wd.[Date],Replace(fc.Dept,'MA_','') as Dept, fc.FC_USD, dc.CountDayAll, wd.WD_Office,
+                  fc.FC_USD*wd.WD_Office/dc.CountDayAll as FC_Day,
+                  SUM(tb.ACT) as ACT
+            FROM F2Database.dbo.F2_CostFC_Tool_ByDept fc
+            INNER JOIN F2Database.dbo.F2_Working_Date wd ON fc.Year_Month = FORMAT(wd.[Date],'yyyy-MM')\s
+            INNER JOIN\s
+                  (
+                      SELECT FORMAT([Date],'yyyy-MM') as mth,SUM(WD_Office) as CountDayAll,\s
+                      SUM(IIF([Date]<CAST(GETDATE() as date),1,0)*WD_Office) as CountDayMTD
+                      FROM F2Database.dbo.F2_Working_Date
+                      WHERE FORMAT([Date],'yyyyMM') = @month
+                      GROUP BY FORMAT([Date],'yyyy-MM')
+                  ) as dc
+                  ON fc.Year_Month = dc.mth
+            LEFT JOIN
+              (
+              SELECT\s
+                  CASE
+                  WHEN XBLNR2 LIKE '1566-%' THEN\s
+                      CASE
+                          WHEN LEFT(KOSTL,6) IN ('614100','614000') THEN 'PRESS'				
+                          WHEN LEFT(KOSTL,6) = '614200' THEN 'MOLD'				
+                          WHEN LEFT(KOSTL,6) IN ('614600', '614700') THEN 'GUIDE'	
+                      END
+                  ELSE 'OTHER'
+              END as Dept,
+                  iss.MATNR,
+                  part.MAKTX,
+                  CONVERT(DATE,BLDAT,112) as UseDate,
+                  KOSTL,
+                  KONTO,
+                  XBLNR2,
+                  BKTXT,
+                  ERFMG as QTY,
+                  ERFME as UNIT,
+                  IIF(ERFMG<0,-1,1)*AMOUNT as ACT
+              FROM MANUFASPCPD.dbo.MANUFA_F_PD_DTM_ISSUE iss
+              INNER JOIN MANUFASPCPD.dbo.MANUFA_F_PD_GRB_PART part ON iss.MATNR = part.MATNR
+              WHERE KONTO = '570600'
+              AND BLDAT < CONVERT(varchar,GETDATE(),112)
+              ) as tb
+              ON fc.Dept = 'MA_' + tb.Dept AND tb.UseDate = wd.[Date]
+            WHERE Format(wd.[Date],'yyyyMM') = @month	
+              AND fc.Dept Like 'MA_%'\s
+            GROUP BY wd.[Date],fc.Dept,fc.FC_USD, dc.CountDayAll,wd.WD_Office
+            ORDER BY wd.[Date]
             """, nativeQuery = true)
     List<IRepairFeeDailyDTO> getStopHourDailyData(@Param("month") String month);
 }
