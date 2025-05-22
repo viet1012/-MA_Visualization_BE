@@ -12,7 +12,7 @@ import java.util.List;
 public interface IMachineStoppingRepository extends JpaRepository<DummyEntity, Long> {
 
     @Query(value = """
-           DECLARE @month VARCHAR(6) = REPLACE(:month, '-', '');
+            DECLARE @month VARCHAR(6) = REPLACE(:month, '-', '');
             SELECT wd.[Date],stp.Dept, dc.CountDay,wd.WD_Office, stp.FC_StopHour as Stop_Hour_TGT, stp.FC_StopHour*wd.WD_Office/dc.CountDay as Stop_Hour_TGT_MTD, SUM(Stop_Hour) as Stop_Hour_Act
             FROM F2Database.dbo.F2_Working_Date wd\s
             INNER JOIN\s
@@ -52,6 +52,7 @@ public interface IMachineStoppingRepository extends JpaRepository<DummyEntity, L
             		FROM F2Database.dbo.f2_ma_machine_data dt
             	INNER JOIN F2Database.dbo.f2_ma_machine_master mst ON dt.machinecode = mst.code\s
             	WHERE (SENDTIME >= CONVERT(DATE,@month + '01',112) OR FINISHTIME is null)
+            	AND ACTIONCODE LIKE 'AC01%'
             	AND ISSUESTATUS not in ('CANCEL')
             	) as tb
             	ON wd.[Date] = tb.SendDate AND stp.Dept = tb.DIV
