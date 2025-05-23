@@ -1,5 +1,4 @@
-# File: .github/workflows/ci-cd.yml
-name: 🚀 CI/CD for Spring Boot
+name: 🚀 CI for Spring Boot
 
 on:
   push:
@@ -22,4 +21,8 @@ jobs:
       - name: ⚙️ Build with Maven
         run: mvn clean install
 
-
+      - name: 📤 Upload JAR as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: target/*.jar
