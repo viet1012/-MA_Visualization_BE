@@ -21,7 +21,7 @@ public class MachineStoppingController {
     public ResponseEntity<List<IMachineStoppingDTO>> getStopHourData(
             @RequestParam String month
     ){
-        List<IMachineStoppingDTO> data = service.getStopHourData(month);
+        List<IMachineStoppingDTO> data = service.getStopHour(month);
         return ResponseEntity.ok(data);
     }
 }

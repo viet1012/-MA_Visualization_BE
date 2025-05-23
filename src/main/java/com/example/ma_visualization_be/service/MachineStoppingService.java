@@ -12,7 +12,7 @@ public class MachineStoppingService {
     @Autowired
     IMachineStoppingRepository repository;
 
-    public List<IMachineStoppingDTO> getStopHourData(String month){
+    public List<IMachineStoppingDTO> getStopHour(String month){
         return repository.getStopHourData(month);
     }
 }
