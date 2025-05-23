@@ -22,7 +22,7 @@ jobs:
         run: mvn clean install
 
       - name: 📤 Upload JAR as artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-jar
           path: target/*.jar
