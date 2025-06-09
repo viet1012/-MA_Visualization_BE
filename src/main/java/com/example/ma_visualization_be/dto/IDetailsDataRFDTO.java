@@ -2,6 +2,9 @@ package com.example.ma_visualization_be.dto;
 
 public interface IDetailsDataRFDTO {
     String getDept();
+    String getMacId();
+    String getMacName();
+    String getCate();
     String getMatnr();
     String getMaktx();
     String getUseDate();  // hoặc java.sql.Date nếu cần kiểu ngày
