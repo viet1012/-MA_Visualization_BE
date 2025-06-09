@@ -1,4 +1,4 @@
-name: 🚀 CI for Spring Boot
+name: CI for Spring Boot
 
 on:
   push:
