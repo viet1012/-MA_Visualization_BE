@@ -18,7 +18,7 @@ public interface IDetailsDataRFRepository extends JpaRepository<DummyEntity, Lon
             			CASE
             				WHEN LEFT(KOSTL,6) IN ('614100','614000') THEN 'PRESS'
             				WHEN LEFT(KOSTL,6) = '614200' THEN 'MOLD'
-            				WHEN LEFT(KOSTL,6) IN ('614600', '614700') THEN 'GUIDE'	
+            				WHEN LEFT(KOSTL,6) IN ('614600', '614700') THEN 'GUIDE'
             			END
             		ELSE 'OTHER'
             	END as Dept,

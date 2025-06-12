@@ -34,14 +34,14 @@ public interface IDetailsDataRFDailyRepository extends JpaRepository<DummyEntity
                 BKTXT,
                 ERFMG as QTY,
                 ERFME as UNIT,
-                IIF(ERFMG<0,-1,1)*AMOUNT as [ACT ($)]
+                IIF(ERFMG<0,-1,1)*AMOUNT as ACT
             FROM MANUFASPCPD.dbo.MANUFA_F_PD_DTM_ISSUE iss
             INNER JOIN MANUFASPCPD.dbo.MANUFA_F_PD_GRB_PART part ON iss.MATNR = part.MATNR
             LEFT JOIN F2Database.dbo.F2_MA_MACHINE_MASTER mac ON IIF(AUFNR LIKE 'M%',RIGHT(AUFNR,LEN(AUFNR)-1),AUFNR) = mac.CODE
             WHERE KONTO = '570600'
             AND LEFT(BLDAT,6) = @month
             AND BLDAT <= @date
-            ORDER BY [ACT ($)] Desc
+            ORDER BY ACT Desc
             """, nativeQuery = true)
     List<IDetailsDataRFDTO> getDailyDetailsRepairFeeDaily(@Param("month") String month, @Param("dept") String dept);
 
