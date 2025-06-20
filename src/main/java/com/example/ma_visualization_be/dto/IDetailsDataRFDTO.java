@@ -15,4 +15,6 @@ public interface IDetailsDataRFDTO {
     Double getQty();
     String getUnit();
     Double getAct();
+    String getNote();
+
 }

@@ -14,4 +14,5 @@ public interface IRepairFeeDailyDTO {
     Double getFC_Day();
 
     Double getAct();
+
 }

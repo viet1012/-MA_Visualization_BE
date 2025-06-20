@@ -13,7 +13,7 @@ public interface IRepairFeeDailyRepository extends JpaRepository<DummyEntity, Lo
 
     @Query(value = """
                 DECLARE @month VARCHAR(6) = REPLACE(:month, '-', '');
-                
+            
                 SELECT wd.[Date],Replace(fc.Dept,'MA_','') as Dept, fc.FC_USD, dc.CountDayAll, wd.WD_Office,
                       fc.FC_USD*wd.WD_Office/dc.CountDayAll as FC_Day,
                       SUM(tb.ACT) as ACT
