@@ -1,6 +1,4 @@
-package com.example.ma_visualization_be.repository;
-
-import com.example.ma_visualization_be.dto.IMachineDataByCateDTO;
+package com.example.ma_visualization_be.dto;
 
 public class MachineDataByCateDTO {
     private String cate;

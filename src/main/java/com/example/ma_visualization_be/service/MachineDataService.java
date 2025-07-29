@@ -1,10 +1,8 @@
 package com.example.ma_visualization_be.service;
 
-import com.example.ma_visualization_be.dto.IMachineDataByCateDTO;
-import com.example.ma_visualization_be.dto.IMachineDataByGroupDTO;
 import com.example.ma_visualization_be.repository.IMachineDataRepository;
-import com.example.ma_visualization_be.repository.MachineDataByCateDTO;
-import com.example.ma_visualization_be.repository.MachineDataByGroupDTO;
+import com.example.ma_visualization_be.dto.MachineDataByCateDTO;
+import com.example.ma_visualization_be.dto.MachineDataByGroupDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

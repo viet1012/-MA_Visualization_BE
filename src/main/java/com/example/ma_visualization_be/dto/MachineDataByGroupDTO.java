@@ -1,7 +1,4 @@
-package com.example.ma_visualization_be.repository;
-
-import com.example.ma_visualization_be.dto.IMachineDataByCateDTO;
-import com.example.ma_visualization_be.dto.IMachineDataByGroupDTO;
+package com.example.ma_visualization_be.dto;
 
 public class MachineDataByGroupDTO {
     private String macGrp;
