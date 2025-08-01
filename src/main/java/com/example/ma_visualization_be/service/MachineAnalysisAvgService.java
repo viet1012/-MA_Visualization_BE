@@ -2,28 +2,29 @@ package com.example.ma_visualization_be.service;
 
 import com.example.ma_visualization_be.dto.MachineAnalysisRequest;
 import com.example.ma_visualization_be.dto.MachineAnalysisResponse;
+import com.example.ma_visualization_be.repository.MachineAnalysisAvgRepository;
 import com.example.ma_visualization_be.repository.MachineAnalysisRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class MachineAnalysisService {
+public class MachineAnalysisAvgService {
 
     @Autowired
-    private MachineAnalysisRepository machineAnalysisRepository;
+    private MachineAnalysisAvgRepository machineAnalysisAvgRepository;
 
-    public List<MachineAnalysisResponse> getMachineAnalysis(MachineAnalysisRequest request) {
-        // Validate input
-        if (request.getMonth() == null || request.getMonth().length() != 6) {
-            throw new IllegalArgumentException("Month must be in format YYYYMM");
+    public List<MachineAnalysisResponse> getMachineAnalysisAvg (MachineAnalysisRequest request)  {
+
+        if(request.getMonth() == null || request.getMonth().length() != 6){
+            throw  new IllegalArgumentException("Month must be in format YYYYMM");
         }
 
-        if (request.getDivisions() == null || request.getDivisions().isEmpty()) {
+        if(request.getDivisions() == null || request.getDivisions().isEmpty()){
             throw new IllegalArgumentException("Divisions cannot be empty");
         }
 
-        return machineAnalysisRepository.getMachineAnalysis(
+        return machineAnalysisAvgRepository.getMachineAnalysisAve(
                 request.getMonth(),
                 request.getMonthBack(),
                 request.getTopLimit(),

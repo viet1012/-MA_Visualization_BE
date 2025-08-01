@@ -5,14 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import java.math.BigDecimal;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class IMachineAnalysisRepository {
+public class MachineAnalysisRepository {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -101,7 +101,7 @@ public class IMachineAnalysisRepository {
              LEFT JOIN F2Database.dbo.F2_Cost_Center_Share share ON iss.KOSTL = share.Cost_Center
              LEFT JOIN F2Database.dbo.F2_Cost_Center_Share_Ratio ratio ON share.Group_Share = ratio.Dept
                             AND CASE
-                             WHEN XBLNR2 LIKE '1566-%' THEN 
+                             WHEN XBLNR2 LIKE '1566-%' THEN
                               CASE
                                WHEN LEFT(KOSTL,6) IN ('614100','614000') THEN 'PRESS'    
                                WHEN LEFT(KOSTL,6) = '614200' THEN 'MOLD'    
