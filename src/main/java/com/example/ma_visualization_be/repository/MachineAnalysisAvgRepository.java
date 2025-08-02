@@ -24,7 +24,7 @@ public class MachineAnalysisAvgRepository {
                 .collect(Collectors.joining(", "));
 
         String sql = buildDyamicQuery(divisionValues);
-        Object[] params = new Object[3  + divisions.size()];
+        Object[] params = new Object[3 + divisions.size()];
         params[0] = monthBack;
         params[1] = topLimit;
         params[2] = month;
@@ -202,7 +202,7 @@ public class MachineAnalysisAvgRepository {
                   FROM #tempStopHour
                   GROUP BY MacName)
                 
-                 SELECT 'KVH', topUse.STT as [Rank], topUse.MacName,\s
+                 SELECT 'KVH' AS Div, topUse.STT as [Rank], topUse.MacName,\s
                   topUse.Act as RepairFee, topUse.CountMac, \s
                   topUse.Ave_RepairFee,
                   stpHour.Stop_Case, stpHour.Stop_Hour
