@@ -201,20 +201,20 @@ public class MachineAnalysisAvgRepository {
            CROSS JOIN (
             SELECT DISTINCT Div, MacName
             FROM #Rpfee_Ave
-            )\s
+            )
             as Machines
         
            --FINAL
            --KVH
            IF EXISTS (
-               SELECT 1\s
-               FROM @div\s
+               SELECT 1
+               FROM @div
                HAVING COUNT(*) = 1 AND MAX(Value) = 'KVH'
            )
            BEGIN
             WITH topUse AS (
-             SELECT\s
-              MacName,   \s
+             SELECT
+              MacName,
               SUM(Act) as Act,
               SUM(CountMac) as CountMac,
               SUM(Act)/SUM(CountMac) AS Ave_RepairFee,
@@ -229,23 +229,23 @@ public class MachineAnalysisAvgRepository {
              GROUP BY MacName)
         
             SELECT 'AVE' as Scale, 'KVH' as Div, topUse.STT as [Rank], topUse.MacName,\s
-             topUse.Act as RepairFee, topUse.CountMac, \s
+             topUse.Act as RepairFee, topUse.CountMac,
              topUse.Ave_RepairFee,
              stpHour.Stop_Case, stpHour.Stop_Hour
             FROM topUse
             LEFT JOIN stpHour ON topUse.MacName = stpHour.MacName
             WHERE topUse.STT <= @top
             --ORDER BY [Rank]
-           \s
+      
            END
         
            --<>KVH
            ELSE
            BEGIN
             WITH topUse AS (
-             SELECT\s
+             SELECT
               Div,
-              MacName,   \s
+              MacName,
               SUM(Act) as Act,
               SUM(CountMac) as CountMac,
               SUM(Act)/SUM(CountMac) AS Ave_RepairFee,
@@ -261,8 +261,8 @@ public class MachineAnalysisAvgRepository {
         
             SELECT 'AVE' as Scale, topUse.DIV, topUse.STT as [Rank], topUse.MacName,\s
              topUse.Act as RepairFee, stpHour.StopHour,
-             topUse.CountMac, \s
-             topUse.Ave_RepairFee, \s
+             topUse.CountMac,
+             topUse.Ave_RepairFee,
              stpHour.StopCase,
              stpHour.StopHour/stpHour.StopCase as Ave_StopHour
             FROM topUse
@@ -270,8 +270,8 @@ public class MachineAnalysisAvgRepository {
             WHERE topUse.STT <= @top
             AND topUse.Div COLLATE SQL_Latin1_General_CP1_CI_AS
              IN (SELECT value FROM @div)
-            --ORDER BY Div,[Rank]\s
-           \s
+            --ORDER BY Div,[Rank]
+
             UNION ALL
         
             SELECT mm.MonthDescribe as Scale, mm.Div, Null, mm.MacName,
@@ -280,7 +280,7 @@ public class MachineAnalysisAvgRepository {
              rpf.AveRP, --repair fee ave
              stp.StopCase,--StopCase
              stp.AveStp --Ave_StopHour
-            \s
+
             FROM #MonthMachine mm
             INNER JOIN (
              SELECT mm1.Div, mm1.MacName,MonthDescribe
@@ -314,7 +314,7 @@ public class MachineAnalysisAvgRepository {
             AND mm.Div IN (SELECT value FROM @div)
             ORDER BY Div, [Rank]
            END
-               
+          
             """;
     }
 
