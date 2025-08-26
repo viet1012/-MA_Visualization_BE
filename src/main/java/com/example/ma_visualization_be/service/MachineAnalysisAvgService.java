@@ -1,5 +1,6 @@
 package com.example.ma_visualization_be.service;
 
+import com.example.ma_visualization_be.dto.MachineAnalysisAvgResponse;
 import com.example.ma_visualization_be.dto.MachineAnalysisFullResponse;
 import com.example.ma_visualization_be.dto.MachineAnalysisRequest;
 import com.example.ma_visualization_be.dto.MachineAnalysisResponse;
@@ -19,7 +20,7 @@ public class MachineAnalysisAvgService {
     @Autowired
     private MachineAnalysisAvgFullRepository machineAnalysisAvgFullRepository;
 
-    public List<MachineAnalysisResponse> getMachineAnalysisAvg (MachineAnalysisRequest request)  {
+    public List<MachineAnalysisAvgResponse> getMachineAnalysisAvg (MachineAnalysisRequest request)  {
 
         if(request.getMonth() == null || request.getMonth().length() != 6){
             throw  new IllegalArgumentException("Month must be in format YYYYMM");
@@ -33,7 +34,8 @@ public class MachineAnalysisAvgService {
                 request.getMonth(),
                 request.getMonthBack(),
                 request.getTopLimit(),
-                request.getDivisions()
+                request.getDivisions(),
+                request.getMachineName()
         );
     }
 
