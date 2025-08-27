@@ -11,7 +11,7 @@ import java.util.List;
 public class MachineAnalysisAvgResponse {
     private String scale;
     private String div;
-    private Integer rank;
+    private String rank;
     private String macName;
     private BigDecimal repairFee;
     private Integer stopCase;

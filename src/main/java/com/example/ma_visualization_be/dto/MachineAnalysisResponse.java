@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 public class MachineAnalysisResponse {
     private String div;
-    private int rank;
+    private String rank;
     private String macName;
     private BigDecimal repairFee;
     private Integer stopCase;

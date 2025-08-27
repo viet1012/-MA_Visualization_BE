@@ -238,7 +238,7 @@ public class MachineAnalysisRepository {
         public MachineAnalysisResponse mapRow(ResultSet rs, int rowNum) throws SQLException {
             MachineAnalysisResponse response = new MachineAnalysisResponse();
             response.setDiv(rs.getString("DIV"));
-            response.setRank(rs.getInt("Rank"));
+            response.setRank(rs.getString("Rank"));
             response.setMacName(rs.getString("MacName"));
             response.setRepairFee(rs.getBigDecimal("RepairFee"));
             response.setStopCase(rs.getObject("Stop_Case", Integer.class));
