@@ -51,30 +51,6 @@ public class MachineAnalysisAvgController {
         }
     }
 
-    @GetMapping("/analysis/avg/full")
-    public ResponseEntity<?> getMachineAnalysisAvgFull(
-            @RequestParam String month,
-            @RequestParam(defaultValue = "12") int monthBack,
-            @RequestParam(defaultValue = "10") int topLimit,
-            @RequestParam List<String> divisions
-    ) {
-        try {
-            MachineAnalysisRequest request = new MachineAnalysisRequest();
-            request.setMonth(month);
-            request.setMonthBack(monthBack);
-            request.setTopLimit(topLimit);
-            request.setDivisions(divisions);
 
-            List<MachineAnalysisFullResponse> result = machineAnalysisAvgService.getMachineAnalysisAvgFullResponse(request);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            // Log lỗi để debug dễ hơn
-            e.printStackTrace();
-
-            // Trả mã lỗi 500 kèm message lỗi
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error occurred: " + e.getMessage());
-        }
-    }
 
 }

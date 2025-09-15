@@ -15,4 +15,6 @@ public class MachineAnalysisRequest {
     private int topLimit = 10; // Default top 10
     private List<String> divisions; // ["PRESS", "MOLD", "GUIDE"] or ["KVH"]
     private String machineName;
+    private String monthFrom;
+    private String monthTo;
 }

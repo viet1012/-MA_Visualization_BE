@@ -18,10 +18,10 @@ public interface IRepairFeeDailyRepository extends JpaRepository<DummyEntity, Lo
                       fc.FC_USD*wd.WD_Office/dc.CountDayAll as FC_Day,
                       SUM(tb.ACT) as ACT
                 FROM F2Database.dbo.F2_CostFC_Tool_ByDept fc
-                INNER JOIN F2Database.dbo.F2_Working_Date wd ON fc.Year_Month = FORMAT(wd.[Date],'yyyy-MM')\s
-                INNER JOIN\s
+                INNER JOIN F2Database.dbo.F2_Working_Date wd ON fc.Year_Month = FORMAT(wd.[Date],'yyyy-MM')
+                INNER JOIN
                       (
-                          SELECT FORMAT([Date],'yyyy-MM') as mth,SUM(WD_Office) as CountDayAll,\s
+                          SELECT FORMAT([Date],'yyyy-MM') as mth,SUM(WD_Office) as CountDayAll,
                           SUM(IIF([Date]<CAST(GETDATE() as date),1,0)*WD_Office) as CountDayMTD
                           FROM F2Database.dbo.F2_Working_Date
                           WHERE FORMAT([Date],'yyyyMM') = @month
@@ -30,9 +30,9 @@ public interface IRepairFeeDailyRepository extends JpaRepository<DummyEntity, Lo
                       ON fc.Year_Month = dc.mth
                 LEFT JOIN
                   (
-                  SELECT\s
+                  SELECT
                       CASE
-                      WHEN XBLNR2 LIKE '1566-%' THEN\s
+                      WHEN XBLNR2 LIKE '1566-%' THEN
                           CASE
                               WHEN LEFT(KOSTL,6) IN ('614100','614000') THEN 'PRESS'
                               WHEN LEFT(KOSTL,6) = '614200' THEN 'MOLD'
@@ -56,8 +56,8 @@ public interface IRepairFeeDailyRepository extends JpaRepository<DummyEntity, Lo
                   AND BLDAT < CONVERT(varchar,GETDATE(),112)
                   ) as tb
                   ON fc.Dept = 'MA_' + tb.Dept AND tb.UseDate = wd.[Date]
-                WHERE Format(wd.[Date],'yyyyMM') = @month	
-                  AND fc.Dept Like 'MA_%'\s
+                WHERE Format(wd.[Date],'yyyyMM') = @month
+                  AND fc.Dept Like 'MA_%'
                 GROUP BY wd.[Date],fc.Dept,fc.FC_USD, dc.CountDayAll,wd.WD_Office
                 ORDER BY wd.[Date]
             """, nativeQuery = true)
