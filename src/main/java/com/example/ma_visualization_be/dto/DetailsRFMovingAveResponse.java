@@ -3,6 +3,7 @@ package com.example.ma_visualization_be.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -18,6 +19,10 @@ public class DetailsRFMovingAveResponse {
     private String matnr;
     private String maktx;
     private Date useDate;
+    private String kostl;
+    private String konto;
+    private String xblnr2;
+    private String bktxt;
     private BigDecimal qty;
     private String unit;
     private BigDecimal act;
