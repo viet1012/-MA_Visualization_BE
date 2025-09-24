@@ -43,6 +43,15 @@ public interface IDetailsDataRFRepository extends JpaRepository<DummyEntity, Lon
             LEFT JOIN F2Database.dbo.F2_MA_MACHINE_MASTER mac ON IIF(AUFNR LIKE 'M%',RIGHT(AUFNR,LEN(AUFNR)-1),AUFNR) = mac.CODE
             LEFT JOIN F2Database.dbo.F2_Cost_Center_Share share ON iss.KOSTL = share.Cost_Center
             LEFT JOIN F2Database.dbo.F2_Cost_Center_Share_Ratio ratio ON share.Group_Share = ratio.Dept
+            AND CASE
+                WHEN XBLNR2 LIKE '1566-%' THEN\s
+                 CASE
+                  WHEN LEFT(KOSTL,6) IN ('614100','614000') THEN 'PRESS'   \s
+                  WHEN LEFT(KOSTL,6) = '614200' THEN 'MOLD'   \s
+                  WHEN LEFT(KOSTL,6) IN ('614600', '614700') THEN 'GUIDE'\s
+                 END
+                ELSE 'OTHER'
+                END <> 'OTHER'
             WHERE KONTO = '570600'
               AND (',' + REPLACE(:monthsCsv, '-', '') + ',' LIKE '%,' + LEFT(BLDAT,6) + ',%')
               AND BLDAT < CONVERT(varchar,GETDATE(),112)
