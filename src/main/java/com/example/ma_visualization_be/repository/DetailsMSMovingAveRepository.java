@@ -125,7 +125,12 @@ public class DetailsMSMovingAveRepository {
                     END
                    ELSE mst.DIVISION
                   END) IN (SELECT Value FROM @div)
-                 Order By SENDTIME DESC
+                 Order By CASE
+                   WHEN STATUSCODE = 'ST02'
+                    THEN CAST(ROUND((DATEDIFF(MINUTE,ISNULL(CONFIRM_DATE,SENDTIME),COALESCE(FINISHTIME,@monthToDate))) /60.0*20/24,2) AS FLOAT)
+                   WHEN STATUSCODE = 'ST01'
+                    THEN CAST(ROUND((DATEDIFF(MINUTE,ISNULL(STARTTIME,SENDTIME),COALESCE(FINISHTIME,@monthToDate))) /60.0*20/24,2) AS FLOAT)
+                  END - COALESCE(tempR.Temp_Run,0) DESC
                 """;
     }
 

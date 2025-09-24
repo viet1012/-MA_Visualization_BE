@@ -106,7 +106,7 @@ public class DetailsRFMovingAveRepository {
                    END
                   ELSE 'OTHER'
                  END IN (SELECT Value FROM @div)
-                ORDER BY UseDate DESC
+                ORDER BY IIF(ERFMG<0,-1,1)*AMOUNT*COALESCE(ratio.Ratio,1) DESC
                 """;
     }
 

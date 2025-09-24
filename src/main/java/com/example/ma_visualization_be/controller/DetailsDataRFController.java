@@ -1,7 +1,6 @@
 package com.example.ma_visualization_be.controller;
 
 import com.example.ma_visualization_be.dto.IDetailsDataRFDTO;
-import com.example.ma_visualization_be.dto.IRepairFeeDTO;
 import com.example.ma_visualization_be.service.DetailsDataRFService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,8 +20,9 @@ public class DetailsDataRFController {
     @GetMapping
     public ResponseEntity<List<IDetailsDataRFDTO>> getDailyDetailsRepairFee(
             @RequestParam String month, @RequestParam String dept
-    ){
-        List<IDetailsDataRFDTO> data = service.getDailyDetailsRepairFee(month,dept);
+    ) {
+        List<IDetailsDataRFDTO> data = service.getDailyDetailsRepairFee(month, dept);
         return ResponseEntity.ok(data);
     }
+
 }
