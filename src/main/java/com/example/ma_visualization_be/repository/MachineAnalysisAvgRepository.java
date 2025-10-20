@@ -37,7 +37,6 @@ public class MachineAnalysisAvgRepository {
     }
 
     private String buildDynamicQuery(String divisionValues) {
-        String insertValues = divisionValues.replaceAll("'([^']+)'", "('$1')");
         return """
                 DECLARE @mn INT = ?
                 DECLARE @top INT = ?
