@@ -1,12 +1,45 @@
 package com.example.ma_visualization_be.repository;
 
 import com.example.ma_visualization_be.dto.DetailsMSReasonResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.stream.Collectors;
 
+@Repository
 public class DetailsMSReasonRepository {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public List<DetailsMSReasonResponse> getDetailsMSReason(
+            String month, List<String> divisions) {
+
+        // Build dynamic division values
+        String divisionValues = divisions.stream()
+                .map(div -> "(?)")
+                .collect(Collectors.joining(", "));
+
+        // Build the complete SQL query
+        String sql = buildDynamicQuery(divisionValues);
+
+        // Prepare parameters
+        Object[] params = new Object[1 + divisions.size()];
+        params[0] = month;
+
+        // Add division values to parameters
+        for (int i = 0; i < divisions.size(); i++) {
+            params[1 + i] = divisions.get(i);
+        }
+
+        return jdbcTemplate.query(sql, params, new DetailsMSReasonRepository.DetailMSReasonRowMapper());
+    }
+
     private String buildDynamicQuery(String divisionValues) {
         return """
                 DECLARE @month VARCHAR(6) = ?
