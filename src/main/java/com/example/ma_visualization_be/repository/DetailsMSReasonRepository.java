@@ -1,45 +1,12 @@
 package com.example.ma_visualization_be.repository;
 
-
-import com.example.ma_visualization_be.dto.MachineStopReasonResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+import com.example.ma_visualization_be.dto.DetailsMSReasonResponse;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.stream.Collectors;
 
-@Repository
-public class MachineStopReasonRepository {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    public List<MachineStopReasonResponse> getMachineStoppingReason(
-            String month, List<String> divisions) {
-
-        // Build dynamic division values
-        String divisionValues = divisions.stream()
-                .map(div -> "(?)")
-                .collect(Collectors.joining(", "));
-
-        // Build the complete SQL query
-        String sql = buildDynamicQuery(divisionValues);
-
-        // Prepare parameters
-        Object[] params = new Object[1 + divisions.size()];
-        params[0] = month;
-
-        // Add division values to parameters
-        for (int i = 0; i < divisions.size(); i++) {
-            params[1 + i] = divisions.get(i);
-        }
-
-        return jdbcTemplate.query(sql, params, new MachineStopReasonRepository.MachineStoppingReasonRowMapper());
-    }
-
+public class DetailsMSReasonRepository {
     private String buildDynamicQuery(String divisionValues) {
         return """
                 DECLARE @month VARCHAR(6) = ?
@@ -49,6 +16,8 @@ public class MachineStopReasonRepository {
                 INSERT INTO @div (Value)
                 VALUES """ + divisionValues + """
                 
+                
+                DECLARE @rs1 NVARCHAR(50) = 'Electronic'
                 
                 IF OBJECT_ID('tempdb..#rs') IS NOT NULL DROP TABLE #rs;
                 
@@ -99,22 +68,30 @@ public class MachineStopReasonRepository {
                  AND dt.STATUSCODE = 'ST02'
                 ORDER BY SENDTIME
                 
-                SELECT #rs.DIV,ts.Reason_EN as Reason1,COUNT(Stop_Hour) as Stop_Case, SUM(Stop_Hour) as Stop_Hour
+                SELECT #rs.DIV,
+                 COALESCE(ts1.Reason_EN, #rs.reason1) as Reason1,
+                 COALESCE(ts2.Reason_EN, #rs.reason2) as Reason2,
+                 COUNT(Stop_Hour) as Stop_Case, SUM(Stop_Hour) as Stop_Hour
                 FROM #rs
-                LEFT JOIN F2Database.dbo.F2_MA_Translate_Master ts ON #rs.reason1 COLLATE SQL_Latin1_General_CP1_CI_AS = ts.Reason_VN
-                WHERE DIV COLLATE SQL_Latin1_General_CP1_CI_AS IN (SELECT value FROM @div)
-                GROUP BY #rs.DIV,ts.Reason_EN
+                LEFT JOIN F2Database.dbo.F2_MA_Translate_Master ts1 ON #rs.reason1 = ts1.Reason_VN
+                LEFT JOIN F2Database.dbo.F2_MA_Translate_Master ts2 ON #rs.reason2 = ts2.Reason_VN
+                WHERE ts1.Reason_EN = @rs1
+                AND #rs.DIV COLLATE SQL_Latin1_General_CP1_CI_AS IN (SELECT value FROM @div)
+                GROUP BY #rs.DIV,
+                 COALESCE(ts1.Reason_EN, #rs.reason1),
+                 COALESCE(ts2.Reason_EN, #rs.reason2)
                 ORDER BY SUM(Stop_Hour) DESC
                 
                 """;
     }
 
-    private static class MachineStoppingReasonRowMapper implements RowMapper<MachineStopReasonResponse> {
+    private static class DetailMSReasonRowMapper implements RowMapper<DetailsMSReasonResponse> {
         @Override
-        public MachineStopReasonResponse mapRow(ResultSet rs, int rowNum) throws SQLException {
-            MachineStopReasonResponse response = new MachineStopReasonResponse();
+        public DetailsMSReasonResponse mapRow(ResultSet rs, int rowNum) throws SQLException {
+            DetailsMSReasonResponse response = new DetailsMSReasonResponse();
             response.setDiv(rs.getString("DIV"));
             response.setReason1(rs.getString("Reason1"));
+            response.setReason2(rs.getString("Reason2"));
             response.setStopCase(rs.getObject("Stop_Case", Integer.class));
             response.setStopHour(rs.getDouble("Stop_Hour"));
             return response;
