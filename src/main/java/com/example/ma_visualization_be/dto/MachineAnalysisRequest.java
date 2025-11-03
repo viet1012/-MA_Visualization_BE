@@ -1,9 +1,9 @@
 package com.example.ma_visualization_be.dto;
 
-import lombok.Data;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
+
 import java.util.List;
 
 @Data
@@ -17,4 +17,5 @@ public class MachineAnalysisRequest {
     private String machineName;
     private String monthFrom;
     private String monthTo;
+    private String reason;
 }

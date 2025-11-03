@@ -46,7 +46,8 @@ public class MachineStopReasonService {
 
         return detailsMSReasonRepository.getDetailsMSReason(
                 request.getMonth(),
-                request.getDivisions()
+                request.getDivisions(),
+                request.getReason()
         );
     }
 }

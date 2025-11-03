@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/machine_stopping")
@@ -38,19 +40,26 @@ public class MachineStopReasonController {
     }
 
     @GetMapping("/reason/details")
-    public ResponseEntity<List<DetailsMSReasonResponse>> getDetailsMSReason(
+    public List<DetailsMSReasonResponse> getDetailsMSReason(
             @RequestParam String month,
-            @RequestParam List<String> divisions) {
-        try {
-            MachineAnalysisRequest request = new MachineAnalysisRequest();
-            request.setMonth(month);
-            request.setDivisions(divisions);
+            @RequestParam String divisions,
+            @RequestParam(required = false) String reason) {
 
-            List<DetailsMSReasonResponse> result = service.getDetailsMSReason(request);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+        List<String> divisionList = Arrays.stream(divisions.split(","))
+                .map(String::trim)
+                .collect(Collectors.toList());
+
+        if (reason != null && reason.isBlank()) {
+            reason = null; // convert chuỗi rỗng thành null
         }
+
+        MachineAnalysisRequest req = new MachineAnalysisRequest();
+        req.setMonth(month);
+        req.setDivisions(divisionList);
+        req.setReason(reason);
+
+        return service.getDetailsMSReason(req);
     }
+
 }
 
