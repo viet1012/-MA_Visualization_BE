@@ -1,0 +1,124 @@
+package com.example.ma_visualization_be.repository;
+
+
+import com.example.ma_visualization_be.dto.DetailsMachineStopReasonDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Repository;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Repository
+public class DetailsMachineStopReasonRepository {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public List<DetailsMachineStopReasonDTO> getDetailsMSReason(
+            String month, List<String> divisions) {
+
+        String divisionValues = divisions.stream()
+                .map(div -> "(?)")
+                .collect(Collectors.joining(", "));
+
+        String sql = buildDynamicQuery(divisionValues);
+
+        Object[] params = new Object[1 + divisions.size()];
+        int idx = 0;
+
+        params[idx++] = month;
+
+        for (String div : divisions) {
+            params[idx++] = div;
+        }
+        return jdbcTemplate.query(sql, params, new DetailMSReasonRowMapper());
+    }
+
+
+    private String buildDynamicQuery(String divisionValues) {
+        return """
+                DECLARE @month VARCHAR(6) = ?
+                DECLARE @fromD DATETIME = CONVERT(DATETIME, @month + '01', 112)
+                DECLARE @toD DATETIME = Least(GETDATE(),DATEADD(MILLISECOND, -3, DATEADD(DAY, 1, CAST(EOMONTH(@fromD) AS DATETIME))))
+                
+                DECLARE @div TABLE (Value NVARCHAR(50))
+                INSERT INTO @div (Value)
+                VALUES """ + divisionValues + """
+                
+                IF OBJECT_ID('tempdb..#rs') IS NOT NULL DROP TABLE #rs;
+                
+                SELECT\s
+                 GREATEST(CONVERT(DATE,dt.SENDTIME,112),CONVERT(DATE,@month + '01',112)) as SendDate,
+                 CASE
+                  WHEN mst.DIVISION Like '%GUIDE' THEN 'GUIDE'
+                  WHEN mst.DIVISION Like 'SUPPORT%' THEN 'PRESS'
+                  ELSE mst.DIVISION
+                 END as DIV,
+                 GROUPNAME,
+                 dt.MACHINECODE,
+                 MACHINE_TYPE,
+                    STATUSCODE,
+                 dt.REF_NO,
+                    convert(varchar,ISNULL(CONFIRM_DATE,SENDTIME),120) SENDTIME,
+                    convert(varchar,STARTTIME,120) STARTTIME,
+                    convert(varchar,FINISHTIME,120) FINISHTIME,tempR.Temp_Run,
+                 CASE
+                  WHEN STATUSCODE = 'ST02'
+                   THEN CAST(ROUND((DATEDIFF(MINUTE,GREATEST(ISNULL(CONFIRM_DATE,SENDTIME),CONVERT(DATE,@month + '01',112)),COALESCE(FINISHTIME,@toD))) /60.0*20/24,2) AS FLOAT)
+                  WHEN STATUSCODE = 'ST01'
+                   THEN CAST(ROUND((DATEDIFF(MINUTE,GREATEST(ISNULL(STARTTIME,SENDTIME),CONVERT(DATE,@month + '01',112)),COALESCE(FINISHTIME,@toD))) /60.0*20/24,2) AS FLOAT)
+                 END - COALESCE(tempR.Temp_Run,0) As Stop_Hour,
+                 dt.ISSUESTATUS,
+                 rs.C_LINHKIEN_VI,
+                 PARSENAME(REPLACE(rs.C_LINHKIEN_VI,'--','.'),3) COLLATE SQL_Latin1_General_CP1_CI_AS  as reason1,
+                 PARSENAME(REPLACE(rs.C_LINHKIEN_VI,'--','.'),2) COLLATE SQL_Latin1_General_CP1_CI_AS  as reason2,
+                 PARSENAME(REPLACE(rs.C_LINHKIEN_VI,'--','.'),1) COLLATE SQL_Latin1_General_CP1_CI_AS  as reason3\s
+                
+                INTO #rs
+                FROM F2Database.dbo.f2_ma_machine_data dt
+                INNER JOIN F2Database.dbo.f2_ma_machine_master mst ON dt.machinecode = mst.code\s
+                LEFT JOIN (
+                  SELECT REF_NO, Min_Stop, Max_Stop,
+                   CAST(ROUND(DATEDIFF(MINUTE,Min_Stop,Max_Stop) /60.0*20/24,2) AS FLOAT) as Temp_Run
+                  FROM (
+                   SELECT REF_NO, MIN(GREATEST(STOP_DATE,@fromD)) as Min_Stop,MAX(STOP_DATE) as Max_Stop
+                   FROM F2Database.dbo.F2_MA_MACHINE_STOPTIME
+                   GROUP BY REF_NO
+                   ) as t1\s
+                  ) as tempR
+                  ON dt.REF_NO = tempR.REF_NO
+                LEFT JOIN F2Database.dbo.F2_MA_MACHINE_CONTENT rs ON dt.REF_NO = rs.REF_NO
+                WHERE FINISHTIME BETWEEN @fromD AND @toD
+                 AND ACTIONCODE LIKE 'AC01%'
+                 AND ISSUESTATUS not in ('CANCEL')
+                 AND dt.STATUSCODE = 'ST02'
+                ORDER BY SENDTIME
+                
+                SELECT #rs.DIV, #rs.MACHINECODE, #rs.MACHINE_TYPE, ts.Reason_EN, #rs.reason2, #rs.reason3, #rs.Stop_Hour, #rs.C_LINHKIEN_VI
+                FROM #rs
+                LEFT JOIN F2Database.dbo.F2_MA_Translate_Master ts ON #rs.reason1 COLLATE SQL_Latin1_General_CP1_CI_AS = ts.Reason_VN
+                WHERE DIV COLLATE SQL_Latin1_General_CP1_CI_AS IN (SELECT value FROM @div)
+                
+                """;
+    }
+
+    private static class DetailMSReasonRowMapper implements RowMapper<DetailsMachineStopReasonDTO> {
+        @Override
+        public DetailsMachineStopReasonDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
+            DetailsMachineStopReasonDTO o = new DetailsMachineStopReasonDTO();
+            o.setDiv(rs.getString("DIV"));
+            o.setMachineCode(rs.getString("MACHINECODE"));
+            o.setMachineType(rs.getString("Machine_Type"));
+            o.setReason1(rs.getString("Reason_EN"));
+            o.setReason2(rs.getString("Reason2"));
+            o.setReason3(rs.getString("reason3"));
+            o.setStopHour(rs.getDouble("Stop_Hour"));
+            o.setLinhKienVi(rs.getString("C_LINHKIEN_VI"));
+            return o;
+        }
+    }
+}

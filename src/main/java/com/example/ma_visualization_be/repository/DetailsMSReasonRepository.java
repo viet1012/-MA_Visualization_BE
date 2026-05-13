@@ -125,14 +125,14 @@ public class DetailsMSReasonRepository {
                 )
                 SELECT DIV, Reason1, Reason2, Stop_Case, Stop_Hour
                 FROM cte
-                WHERE rn <= 10
+                WHERE rn <= 20
                 
                 UNION ALL
                 
                 SELECT DIV, NULL AS Reason1, 'OTHERS' AS Reason2,
                        SUM(Stop_Case) AS Stop_Case, SUM(Stop_Hour) AS Stop_Hour
                 FROM cte
-                WHERE rn > 10
+                WHERE rn > 20
                 GROUP BY DIV
                 """;
     }
